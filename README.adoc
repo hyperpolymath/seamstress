@@ -1,1 +1,23 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= Seamstress
 
+image:https://img.shields.io/badge/License-AGPL_3.0-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-purple.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+
+:toc: preamble
+:toclevels: 2
+:icons: font
+
+Seamstress: Architectural seams as first-class artifacts—documented, checkable, evolvable boundaries between components.
+
+== Overview
+
+This project is part of the hyperpolymath ecosystem.
+
+== Status
+
+Under development.
+
+== License
+
+AGPL-3.0-or-later. See link:LICENSE[LICENSE].
