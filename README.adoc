@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: PMPL-1.0
-= Seamstress
+image:[License,link="https://github.com/hyperpolymath/palimpsest-license"]
 
-image:https://img.shields.io/badge/License-AGPL_3.0-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]
-image:https://img.shields.io/badge/Philosophy-Palimpsest-purple.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+// SPDX-License-Identifier: PMPL-1.0
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+
+= Seamstress
 
 :toc: preamble
 :toclevels: 2
