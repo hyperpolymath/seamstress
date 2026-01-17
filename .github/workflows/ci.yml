@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  rust:
+    name: Rust (seamctl)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: dtolnay/rust-toolchain@6d9817901c499d6b02debbb57edb38d33daa680b # stable
+        with:
+          components: rustfmt, clippy
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            tools/seamctl/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('tools/seamctl/Cargo.lock') }}
+      - name: fmt
+        run: cargo fmt --manifest-path tools/seamctl/Cargo.toml --all -- --check
+      - name: clippy
+        run: cargo clippy --manifest-path tools/seamctl/Cargo.toml -- -D warnings
+      - name: test
+        run: cargo test --manifest-path tools/seamctl/Cargo.toml
+      - name: seamctl validate
+        run: cargo run --quiet --manifest-path tools/seamctl/Cargo.toml -- validate
+
+  elixir:
+    name: Elixir (seamstressd)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: erlef/setup-beam@5304e04ea2b355f03681464e683d92e3b2f18451 # v1
+        with:
+          otp-version: "26.2.1"
+          elixir-version: "1.16.0"
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        with:
+          path: |
+            services/seamstressd/deps
+            services/seamstressd/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('services/seamstressd/mix.lock') }}
+      - name: deps
+        run: |
+          cd services/seamstressd
+          mix deps.get
+      - name: format
+        run: |
+          cd services/seamstressd
+          mix format --check-formatted
+      - name: test
+        run: |
+          cd services/seamstressd
+          mix test

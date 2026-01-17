@@ -1,0 +1,9 @@
+= FRR Zebra proving ground
+
+This target exists to exercise one seam slice end-to-end.
+
+== Focus seam slice (v0)
+* Zebra ↔ zserv (IPC boundary between zebra and other daemons)
+
+The goal is not to model all of FRR; it is to force the seam artifact model,
+validation, reporting, and later conformance vectors to be real.

@@ -1,0 +1,13 @@
+= Architecture
+:toc:
+
+== Core vs orchestration
+
+* `tools/seamctl` (Rust) is the authoritative seam truth engine.
+* `services/seamstressd` (Elixir) orchestrates checks and automations; it must not redefine seam semantics.
+
+== Canonical artifacts
+
+* `seams/schema/` — schema for seam records
+* `seams/records/` — seam records for this repo
+* `targets/**/seams/records/` — seam records for proving grounds and integrations

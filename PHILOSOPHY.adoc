@@ -1,0 +1,10 @@
+= Philosophy
+
+Seams are not vibes. They are artifacts.
+
+A seam is only real if it is:
+* explicit (documented boundary)
+* checkable (conformance + invariants)
+* replaceable (compat policy + evolution plan)
+* operable (failure behavior + observability)
+* governed (ownership + change gates)

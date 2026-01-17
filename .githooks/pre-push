@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "[hook] cargo test"
+cargo test --manifest-path tools/seamctl/Cargo.toml
+
+echo "[hook] clippy"
+cargo clippy --manifest-path tools/seamctl/Cargo.toml -- -D warnings
+
+echo "[hook] mix test"
+( cd services/seamstressd && mix test )
+
+echo "[hook] ok"

@@ -1,0 +1,5 @@
+= Conformance Checklist
+
+* Are golden vectors defined?
+* Are round-trip / mapping properties stated?
+* Are compatibility claims tested across versions?

@@ -1,0 +1,101 @@
+{
+  "id": "example-seam",
+  "title": "Example seam record",
+  "status": "draft",
+  "owners": [
+    {
+      "name": "Owner Name",
+      "contact": "contact@example.invalid",
+      "role": "maintainer"
+    }
+  ],
+  "side_a": "component-a",
+  "side_b": "component-b",
+  "boundary_type": "ipc",
+  "data_flows": [
+    {
+      "name": "example_message",
+      "direction": "a_to_b",
+      "description": "Example flow for schema illustration."
+    }
+  ],
+  "contract_artifacts": [
+    {
+      "path": "seams/records/_example.seam.json",
+      "kind": "example",
+      "version": "0.1.0"
+    }
+  ],
+  "compat_policy": {
+    "strategy": "semver-ish",
+    "rules": [
+      "Backward compatible additions only in MINOR"
+    ],
+    "deprecation_window_days": 30
+  },
+  "semantic_invariants": [
+    "Messages remain parseable across supported versions."
+  ],
+  "security_invariants": [
+    "No secrets in payloads; capabilities are explicit."
+  ],
+  "privacy_invariants": [
+    "No personal data crosses this seam."
+  ],
+  "test_vectors": [],
+  "checks": {
+    "conformance": {
+      "status": "todo",
+      "notes": "Add golden vectors in seams/vectors/."
+    },
+    "no_hidden_channels": {
+      "status": "todo",
+      "notes": "Complete checklist in seams/checklists/no-hidden-channels.adoc."
+    },
+    "evolution": {
+      "status": "todo",
+      "notes": "Define evolution plan and compatibility tests."
+    }
+  },
+  "slo": {
+    "latency_ms_p95": 50,
+    "error_rate_max": 0.01
+  },
+  "failure_behavior": {
+    "timeouts": "TODO",
+    "retries": "TODO",
+    "backpressure": "TODO",
+    "idempotency": "TODO"
+  },
+  "observability": {
+    "metrics": [],
+    "logs": {
+      "required_fields": [
+        "seam_id",
+        "component",
+        "event"
+      ]
+    },
+    "tracing": {
+      "propagation": [
+        "traceparent"
+      ]
+    }
+  },
+  "change_process": {
+    "required_reviewers": [
+      "@hyperpolymath"
+    ],
+    "gates": [
+      "seamctl validate"
+    ]
+  },
+  "rollout_backout": {
+    "rollout_steps": [
+      "TODO"
+    ],
+    "backout_steps": [
+      "TODO"
+    ]
+  }
+}

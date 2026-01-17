@@ -1,0 +1,108 @@
+{
+  "id": "zebra-zserv",
+  "title": "Zebra \u2194 zserv IPC seam (FRR)",
+  "status": "draft",
+  "owners": [
+    {
+      "name": "Seam Owner",
+      "contact": "TODO",
+      "role": "maintainer"
+    }
+  ],
+  "side_a": "frr.zebra",
+  "side_b": "frr.zserv-clients",
+  "boundary_type": "ipc",
+  "data_flows": [
+    {
+      "name": "zapi_messages",
+      "direction": "bidirectional",
+      "description": "ZAPI message exchange between zebra and clients."
+    }
+  ],
+  "contract_artifacts": [
+    {
+      "path": "targets/frr-zebra/NOTES.adoc",
+      "kind": "notes",
+      "version": "0.1.0"
+    },
+    {
+      "path": "targets/frr-zebra/seams/records/zebra-zserv.seam.json",
+      "kind": "seam_record",
+      "version": "0.1.0"
+    }
+  ],
+  "compat_policy": {
+    "strategy": "explicit-versioned-protocol",
+    "rules": [
+      "No breaking changes without major bump and migration window"
+    ],
+    "deprecation_window_days": 90
+  },
+  "semantic_invariants": [
+    "Route state converges deterministically given identical message sequences (TODO: formalize)."
+  ],
+  "security_invariants": [
+    "No privilege escalation across zserv; authn/authz assumptions must be documented (TODO)."
+  ],
+  "privacy_invariants": [
+    "No personal data; do not leak operational secrets in logs (TODO define)."
+  ],
+  "test_vectors": [
+    "targets/frr-zebra/seams/vectors/zebra-zserv/"
+  ],
+  "checks": {
+    "conformance": {
+      "status": "todo",
+      "notes": "Define minimal ZAPI vector set and expected responses."
+    },
+    "no_hidden_channels": {
+      "status": "todo",
+      "notes": "Assess global state/implicit ordering/log parsing risks."
+    },
+    "evolution": {
+      "status": "todo",
+      "notes": "Document compat matrix + migration strategy for ZAPI changes."
+    }
+  },
+  "slo": {
+    "latency_ms_p95": 50,
+    "error_rate_max": 0.01
+  },
+  "failure_behavior": {
+    "timeouts": "Define per message type (TODO)",
+    "retries": "Client side retry policy (TODO)",
+    "backpressure": "Queue limits + drop policy (TODO)",
+    "idempotency": "Define idempotent operations (TODO)"
+  },
+  "observability": {
+    "metrics": [],
+    "logs": {
+      "required_fields": [
+        "seam_id",
+        "component",
+        "event"
+      ]
+    },
+    "tracing": {
+      "propagation": [
+        "traceparent"
+      ]
+    }
+  },
+  "change_process": {
+    "required_reviewers": [
+      "@hyperpolymath"
+    ],
+    "gates": [
+      "seamctl validate"
+    ]
+  },
+  "rollout_backout": {
+    "rollout_steps": [
+      "TODO"
+    ],
+    "backout_steps": [
+      "TODO"
+    ]
+  }
+}

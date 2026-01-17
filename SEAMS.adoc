@@ -1,0 +1,13 @@
+= Seams
+:toc:
+
+== Seam types
+* Contract: schemas, IDLs, API surfaces
+* Translation: representation mapping, adapters
+* Containment: isolation, retries, timeouts, backpressure
+* Governance: ownership, approvals, rollout/backout
+* Interaction: human-machine boundaries (consent, reversibility, audit)
+
+== Seam record model
+The canonical seam record is `*.seam.json`, validated by `seams/schema/seam-record.schema.json`.
+See `seams/records/_example.seam.json`.

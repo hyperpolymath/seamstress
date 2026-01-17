@@ -1,0 +1,5 @@
+= Evolution Checklist
+
+* Is the compat policy explicit?
+* Is deprecation window defined?
+* Is rollout/backout documented?

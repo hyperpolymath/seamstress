@@ -1,0 +1,3 @@
+= Test vectors
+
+Each seam may have a vectors directory containing golden inputs/expected outputs plus metadata.

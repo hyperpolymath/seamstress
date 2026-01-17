@@ -1,0 +1,8 @@
+= No Hidden Channels Checklist
+
+This checklist is completed per seam.
+
+* Are there undocumented dependencies (global state, env vars, implicit ordering)?
+* Are logs being parsed as an API?
+* Are there side channels (timing, error messages, shared caches) that matter?
+* Is the least-privilege capability set explicit?

@@ -1,0 +1,8 @@
+= Boundaries (What this project is NOT)
+
+* Not a full enterprise architecture modeling platform.
+* Not a perfect static analysis suite.
+* Not an auto-refactoring framework.
+* Not language-specific: seam artifacts are canonical and language-neutral.
+
+The core (`seamctl`) remains strict, deterministic, and small.

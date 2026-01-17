@@ -1,0 +1,192 @@
+SEAMSTRESS — REPO HANDOVER (Rust core + Elixir orchestration)
+===========================================================
+
+Purpose
+-------
+Build a toolkit that makes architectural seams first-class artifacts with:
+- explicit seam records (contracts, invariants, governance)
+- validation + policy checks
+- dependency graph outputs
+- human-readable reports
+- (v1) test vectors + conformance scaffolding
+- (later) orchestration/agentic workflows
+
+Naming
+------
+- Project: Seamstress (working title)
+- Core CLI: seamctl (Rust, authoritative)
+- Orchestrator: seamstressd (Elixir, optional early, central later)
+
+Repo layout (create exactly this)
+--------------------------------
+README.adoc
+ROADMAP.adoc
+ARCHITECTURE.adoc
+PHILOSOPHY.adoc
+SEAMS.adoc
+CONTRIBUTING.adoc
+BOUNDARIES.adoc
+SECURITY.md
+LICENSE
+
+seams/
+  schema/
+    seam-record.schema.json
+  checklists/
+    no-hidden-channels.adoc
+    conformance.adoc
+    evolution.adoc
+  records/
+    _example.seam.json
+  vectors/
+    README.adoc
+  reports/          (generated; gitignored)
+
+targets/
+  frr-zebra/
+    NOTES.adoc
+    seams/
+      records/
+        zebra-zserv.seam.json
+      vectors/
+        zebra-zserv/
+          README.adoc
+
+tools/
+  seamctl/          (Rust crate)
+    Cargo.toml
+    Cargo.lock
+    src/
+      main.rs
+      cli.rs
+      model.rs
+      validate.rs
+      graph.rs
+      report.rs
+      lib.rs
+
+services/
+  seamstressd/      (Elixir OTP app)
+    mix.exs
+    mix.lock
+    lib/
+    config/
+    test/
+
+.github/workflows/ci.yml
+.github/CODEOWNERS
+.githooks/pre-commit
+.githooks/pre-push
+.editorconfig
+.gitattributes
+.gitignore
+.tool-versions
+
+Canonical seam record format (v0)
+--------------------------------
+- Seam records: *.seam.json
+- Schema: seams/schema/seam-record.schema.json
+
+Seam Record Schema (required fields)
+-----------------------------------
+Identity
+- id (stable slug), title, status (draft|active|deprecated), owners[] {name, contact, role}
+
+Boundary
+- side_a, side_b (component identifiers)
+- boundary_type (ipc|kernel_api|cli|library|network|human_machine)
+- data_flows[] {name, direction (a_to_b|b_to_a|bidirectional), description}
+
+Contract
+- contract_artifacts[] {path, kind, version}
+- compat_policy {strategy, rules[], deprecation_window_days}
+
+Invariants
+- semantic_invariants[], security_invariants[], privacy_invariants[]
+
+Conformance
+- test_vectors[] (paths, may be empty but must exist)
+- checks {conformance, no_hidden_channels, evolution} each has {status, notes}
+
+Operations
+- slo {latency_ms_p95, error_rate_max}
+- failure_behavior {timeouts, retries, backpressure, idempotency}
+
+Observability
+- metrics[], logs {required_fields[]}, tracing {propagation[]}
+
+Governance
+- change_process {required_reviewers[], gates[]}
+- rollout_backout {rollout_steps[], backout_steps[]}
+
+Rust core: seamctl (v0 commands)
+--------------------------------
+Implement ONLY these commands at v0:
+
+1) seamctl validate
+- discovers all *.seam.json under:
+  - seams/records/
+  - targets/**/seams/records/
+- validates against JSON Schema
+- applies policy checks:
+  - owners non-empty
+  - compat_policy present and non-trivial
+  - checks.*.status present
+  - referenced files exist (contract_artifacts paths, vectors paths)
+- exit codes:
+  - 0 ok
+  - 2 schema validation errors
+  - 3 policy errors
+
+2) seamctl graph
+- nodes: components (side_a, side_b)
+- edges: seams (id)
+- outputs json by default; optional dot
+- cycle detection: warn (do not hard-fail in v0)
+
+3) seamctl report
+- generates AsciiDoc report (default seams/reports/seams-report.adoc)
+- includes:
+  - inventory table
+  - missing/weak fields summary
+  - risk flags
+
+v0 risk flags (cheap heuristics)
+-------------------------------
+- missing/empty test_vectors
+- checks.no_hidden_channels.status != done
+- failure_behavior.backpressure missing/empty
+- observability.metrics empty
+- compat_policy.deprecation_window_days missing/zero
+
+Elixir orchestrator: seamstressd (v0 minimal)
+--------------------------------------------
+Keep tiny at first:
+- a runner that shells out to seamctl validate
+- a Mix task mix seam.validate
+No file-watching required in v0.
+
+Repo-managed git hooks
+----------------------
+Use core.hooksPath set to .githooks:
+- pre-commit: seamctl validate + rustfmt check + mix format check
+- pre-push: cargo test + clippy + mix test
+
+CI/CD (GitHub Actions)
+----------------------
+- Rust job: fmt, clippy -D warnings, test, seamctl validate
+- Elixir job: mix format --check-formatted, mix test
+- Required status checks for merging
+
+Definition of Done for v0
+-------------------------
+- seamctl validate passes on:
+  - seams/records/_example.seam.json
+  - targets/frr-zebra/seams/records/zebra-zserv.seam.json
+- CI green
+- hooks executable + documented
+- seamctl report generates a readable AsciiDoc report
+
+LLM prompt
+----------
+See PROMPT.txt in this folder for a copy/paste prompt to bootstrap the repo.
