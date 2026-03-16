@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "b7be2c04-99e5-5510-8e4c-9551b3805949"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "seamstress"
+prefixed-name = "gv-seamstress"
+
+[clade]
+primary = "gv"
+secondary = ["rm"]
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/seamstress"
+gitlab = "hyperpolymath/seamstress"
+bitbucket = "hyperpolymath/seamstress"
+
+[lineage]
+type = "standalone"
+parent = "Architectural seams as first-class artifacts"
+born = "2026-03-16"
