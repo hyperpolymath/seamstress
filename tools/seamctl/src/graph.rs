@@ -1,7 +1,8 @@
 use anyhow::{anyhow, Context, Result};
 use camino::Utf8PathBuf;
-use petgraph::graphmap::DiGraphMap;
+use petgraph::graph::DiGraph;
 use serde_json::json;
+use std::collections::HashMap;
 use walkdir::WalkDir;
 
 use crate::model::SeamRecord;
@@ -39,46 +40,41 @@ pub fn run(root: Option<&str>, format: &str, out: Option<&str>) -> Result<()> {
         return Err(anyhow!("no seam records found"));
     }
 
-    let mut g: DiGraphMap<String, String> = DiGraphMap::new(); // edge weight = seam id
+    let mut g = DiGraph::<String, String>::new();
+    let mut node_map: HashMap<String, petgraph::graph::NodeIndex> = HashMap::new();
     let mut seams = vec![];
 
     for f in files {
         let raw = std::fs::read_to_string(&f).with_context(|| format!("read {f}"))?;
         let rec: SeamRecord = serde_json::from_str(&raw).with_context(|| format!("decode {f}"))?;
-        g.add_node(rec.side_a.clone());
-        g.add_node(rec.side_b.clone());
-        g.add_edge(rec.side_a.clone(), rec.side_b.clone(), rec.id.clone());
+
+        let a_idx = *node_map.entry(rec.side_a.clone()).or_insert_with(|| g.add_node(rec.side_a.clone()));
+        let b_idx = *node_map.entry(rec.side_b.clone()).or_insert_with(|| g.add_node(rec.side_b.clone()));
+        g.add_edge(a_idx, b_idx, rec.id.clone());
         seams.push(rec.id);
     }
 
-    // Cycle detection (simple): if any node reachable to itself via DFS in a small graph, flag.
-    // In v0: warnings only.
-    let mut warnings = vec![];
-    for n in g.nodes() {
-        // naive: if there's a path back, petgraph doesn't give easy on graphmap; skip deep analysis v0.
-        let _ = n;
-    }
-
-    if !warnings.is_empty() {
-        eprintln!("Warnings:");
-        for w in warnings {
-            eprintln!("- {w}");
-        }
-    }
+    let components: Vec<&String> = g.node_weights().collect();
+    let edges: Vec<serde_json::Value> = g.edge_indices().map(|ei| {
+        let (a, b) = g.edge_endpoints(ei).unwrap();
+        let id = &g[ei];
+        json!({"from": g[a], "to": g[b], "seam": id})
+    }).collect();
 
     let payload = json!({
-        "components": g.nodes().collect::<Vec<_>>(),
-        "edges": g.all_edges().map(|(a,b,id)| json!({"from":a,"to":b,"seam":id})).collect::<Vec<_>>(),
+        "components": components,
+        "edges": edges,
         "seams": seams,
     });
 
     let rendered = if format == "json" {
         serde_json::to_string_pretty(&payload)?
     } else if format == "dot" {
-        // Minimal DOT emission
         let mut s = String::from("digraph seams {\n");
-        for (a, b, id) in g.all_edges() {
-            s.push_str(&format!("  \"{}\" -> \"{}\" [label=\"{}\"];\n", a, b, id));
+        for ei in g.edge_indices() {
+            let (a, b) = g.edge_endpoints(ei).unwrap();
+            let id = &g[ei];
+            s.push_str(&format!("  \"{}\" -> \"{}\" [label=\"{}\"];\n", g[a], g[b], id));
         }
         s.push_str("}\n");
         s

@@ -46,7 +46,7 @@ fn load_json(path: &Utf8PathBuf) -> Result<Value> {
 fn compile_schema(schema_path: &Utf8PathBuf) -> Result<JSONSchema> {
     let schema_json = load_json(schema_path)?;
     JSONSchema::options()
-        .with_draft(Draft::Draft202012)
+        .with_draft(Draft::Draft7)
         .compile(&schema_json)
         .map_err(|e| anyhow!("schema compile failed: {e}"))
 }

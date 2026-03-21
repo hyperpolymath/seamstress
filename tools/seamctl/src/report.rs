@@ -75,7 +75,7 @@ pub fn run(root: Option<&str>, out: Option<&str>) -> Result<()> {
     let mut doc = String::new();
     doc.push_str("= Seam Report\n:toc:\n\n");
     doc.push_str("== Inventory\n\n");
-    doc.push_str("[cols="1,3,1,2,2,2",options="header"]\n|===\n");
+    doc.push_str("[cols=\"1,3,1,2,2,2\",options=\"header\"]\n|===\n");
     doc.push_str("|ID |Title |Status |Side A |Side B |Risk flags\n");
     for (id, title, status, a, b, flags) in rows {
         doc.push_str(&format!("|{id} |{title} |{status} |{a} |{b} |{flags}\n"));
