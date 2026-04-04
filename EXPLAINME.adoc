@@ -1,24 +1,134 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2025-2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Seamstress — Show Me The Receipts
 :toc:
+:toclevels: 3
 :icons: font
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up with code paths, caveats, and honest gaps.
+
+== Claim 1: Architectural Seams as First-Class Artifacts
 
 [quote, README]
 ____
-Seamstress: Architectural seams as first-class artifacts—documented, checkable, evolvable boundaries between components.
+Seamstress: Architectural seams as first-class artifacts—documented, checkable, evolvable
+boundaries between components.
 ____
+
+*How it works:* A seam is recorded as a `*.seam.json` file validated against
+`seams/schema/seam-record.schema.json`. The schema requires 22 top-level fields including `id`,
+`title`, `status`, `owners`, `side_a`, `side_b`, `boundary_type`, `data_flows`,
+`contract_artifacts`, `compat_policy`, `semantic_invariants`, `security_invariants`,
+`privacy_invariants`, `test_vectors`, `checks`, `slo`, `failure_behavior`, `observability`,
+`change_process`, and `rollout_backout`. Each record is a machine-checkable specification of a
+boundary between two components. The canonical seam truth engine is `tools/seamctl` (Rust), which
+validates records and generates reports. `services/seamstressd` (Elixir, optional) orchestrates
+automated checks and future agentic workflows without being allowed to redefine seam semantics —
+that responsibility stays exclusively in `seamctl`.
+
+*Honest caveat:* `seamctl` is at an early stage; the HANDOVER.adoc describes the intended repo
+layout in full but several tool subdirectories are scaffolding rather than implemented code. The
+authoritative seam validation logic in Rust is the critical path and is not yet complete.
+
+== Claim 2: Five Seam Type Taxonomy
+
+[quote, SEAMS.adoc]
+____
+Seam types: Contract, Translation, Containment, Governance, Interaction
+____
+
+*How it works:* `SEAMS.adoc` defines five orthogonal seam types: Contract (schemas, IDLs, API
+surfaces), Translation (representation mapping, adapters), Containment (isolation, retries,
+timeouts, backpressure), Governance (ownership, approvals, rollout/backout), and Interaction
+(human-machine boundaries: consent, reversibility, audit). A seam record's `boundary_type` field
+must be one of these five, which constrains what `compat_policy`, `semantic_invariants`, and
+`checks` fields need to contain. The taxonomy allows `seamctl` to apply type-specific validation
+rules, so a Containment seam gets checked for backpressure SLOs while a Governance seam gets
+checked for owner-approval records.
+
+*Honest caveat:* The type-specific validation rules in `seamctl` are not yet fully implemented.
+The JSON schema enforces structural validity; semantic validation per seam type requires additional
+Rust logic that is specified in HANDOVER.adoc but not yet coded.
+
+== Dogfooded Across The Account
+
+[cols="1,2,1"]
+|===
+| Repo | How Seamstress is used | Status
+
+| `seamstress` itself
+| `seams/records/_example.seam.json` is the reference seam record; Hypatia CI validates workflows
+| Active (scaffolding)
+
+| `kea`
+| Kea's Mandible→Call→Bivouac boundary is an ideal candidate for a Contract seam record
+| Planned
+
+| `laminar`
+| Elixir control plane ↔ Rclone data plane boundary fits a Containment seam
+| Planned
+
+| `burble`
+| Elixir↔Zig NIF boundaries and WebRTC↔BEAM transport seams are natural targets
+| Planned
+
+| `idaptik`
+| VM↔engine and level-architect↔main-game boundaries are Governance seam candidates
+| Planned
+|===
+
+Seamstress is a meta-tool; its dogfooding story depends on the `seamctl` validator reaching
+sufficient maturity to validate real seam records in other repos.
 
 == File Map
 
-[cols="1,2"]
+[cols="1,3"]
 |===
 | Path | What's There
 
-| `test(s)/` | Test suite
+| `seams/schema/seam-record.schema.json`
+| JSON Schema (Draft 2020-12) for seam records: 22 required fields, enum constraints on status/boundary_type
+
+| `seams/records/_example.seam.json`
+| Reference seam record demonstrating all required and optional fields
+
+| `seams/checklists/`
+| Human-readable checklists: `no-hidden-channels.adoc`, `conformance.adoc`, `evolution.adoc`
+
+| `seams/vectors/`
+| Test vector directory for conformance testing (structure present; vectors TBD)
+
+| `seams/reports/`
+| Generated report output directory (gitignored)
+
+| `SEAMS.adoc`
+| Seam type taxonomy (Contract/Translation/Containment/Governance/Interaction) and record model
+
+| `ARCHITECTURE.adoc`
+| Core vs orchestration: `seamctl` (Rust) is authoritative truth engine; `seamstressd` (Elixir) is optional orchestrator
+
+| `BOUNDARIES.adoc`
+| What Seamstress is NOT: not an enterprise modelling platform, not a static analysis suite, not language-specific
+
+| `PHILOSOPHY.adoc`
+| Design philosophy: seams as living documents, evolvability over perfection
+
+| `HANDOVER.adoc`
+| Full intended repo layout, naming conventions, and implementation brief for `seamctl` and `seamstressd`
+
+| `ROADMAP.adoc`
+| Milestone plan: v0.1.0 (seamctl validate), v0.2.0 (dependency graph), v1.0.0 (orchestration)
+
+| `Justfile`
+| Build recipes: `validate`, `report`, `test`, `panic`
+
+| `.github/workflows/`
+| RSR-standard CI: CodeQL, Hypatia, Scorecard, quality, mirror workflows
+
+| `.machine_readable/6a2/`
+| A2ML machine-readable artefacts (STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK)
 |===
 
 == Questions?
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+Open an issue or reach out to Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>.
