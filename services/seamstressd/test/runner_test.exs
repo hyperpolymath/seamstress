@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Unit tests for Seamstressd.Runner — verifies the public API surface,
 # error handling, and integration contract with the seamctl binary.
 
