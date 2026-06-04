@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
+# Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Property-based tests for Seamstressd.Runner.
 #
 # These tests use manual generation loops (no StreamData dependency required)

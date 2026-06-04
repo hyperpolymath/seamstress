@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 use anyhow::{anyhow, Context, Result};
 use camino::Utf8PathBuf;
 use jsonschema::{Draft, JSONSchema};

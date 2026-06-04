@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) 2025-2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Seamstress — Show Me The Receipts
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[License: MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
+
 :toc:
 :toclevels: 3
 :icons: font
@@ -132,3 +134,10 @@ sufficient maturity to validate real seam records in other repos.
 == Questions?
 
 Open an issue or reach out to Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>.
+
+
+== License
+
+This project is licensed under the Mozilla Public License, v. 2.0. See the `LICENSE` file for details.
+
+SPDX-License-Identifier: MPL-2.0
