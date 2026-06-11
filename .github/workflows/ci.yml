@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: MPL-2.0
 name: ci
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   rust:
     name: Rust (seamctl)
@@ -37,7 +34,6 @@ jobs:
         run: cargo test --manifest-path tools/seamctl/Cargo.toml
       - name: seamctl validate
         run: cargo run --quiet --manifest-path tools/seamctl/Cargo.toml -- validate
-
   elixir:
     name: Elixir (seamstressd)
     runs-on: ubuntu-latest
