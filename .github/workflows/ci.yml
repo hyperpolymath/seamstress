@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MPL-2.0
 # This workflow is managed by gh actions-lock.
+# This workflow is managed by gh actions-lock.
 name: ci
 on:
   push:
@@ -18,7 +19,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: dtolnay/rust-toolchain@6d9817901c499d6b02debbb57edb38d33daa680b # stable
+      - uses: dtolnay/rust-toolchain@v1
         with:
           components: rustfmt, clippy
       - uses: actions/cache@v6.1.0
