@@ -1,0 +1,5 @@
+[tools]
+# = "Pin intentionally for reproducibility (adjust as needed)"
+erlang = "26.2.1"
+elixir = "1.16.0-otp-26"
+rust = "1.76.0"
