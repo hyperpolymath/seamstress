@@ -77,8 +77,8 @@ services/
 
 .github/workflows/ci.yml
 .github/CODEOWNERS
-.githooks/pre-commit
-.githooks/pre-push
+.github/hooks/pre-commit
+.github/hooks/pre-push
 .editorconfig
 .gitattributes
 .gitignore
