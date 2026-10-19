@@ -22,7 +22,8 @@ fn discover(root: &Utf8PathBuf) -> Vec<Utf8PathBuf> {
             continue;
         }
         let s = p.to_string_lossy();
-        let is_candidate_dir = s.contains("/seams/records/") || (s.contains("/targets/") && s.contains("/seams/records/"));
+        let is_candidate_dir = s.contains("/seams/records/")
+            || (s.contains("/targets/") && s.contains("/seams/records/"));
         if !is_candidate_dir {
             continue;
         }
@@ -44,7 +45,9 @@ fn risk_flags(rec: &SeamRecord) -> Vec<String> {
     if rec.checks.no_hidden_channels.status.to_lowercase() != "done" {
         flags.push("no_hidden_channels_not_done".into());
     }
-    if rec.failure_behavior.backpressure.trim().is_empty() || rec.failure_behavior.backpressure == "TODO" {
+    if rec.failure_behavior.backpressure.trim().is_empty()
+        || rec.failure_behavior.backpressure == "TODO"
+    {
         flags.push("backpressure_unspecified".into());
     }
     if rec.observability.metrics.is_empty() {

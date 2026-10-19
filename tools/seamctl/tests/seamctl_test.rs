@@ -24,10 +24,13 @@ use std::path::{Path, PathBuf};
 /// Returns a fresh temporary directory unique to this test invocation.
 fn tmp_dir(label: &str) -> PathBuf {
     let base = std::env::temp_dir();
-    let name = format!("seamctl_test_{label}_{}", std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos());
+    let name = format!(
+        "seamctl_test_{label}_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+    );
     let path = base.join(name);
     fs::create_dir_all(&path).expect("failed to create temp dir");
     path
@@ -156,7 +159,10 @@ mod validate_tests {
         write_valid_record(&root, "seam-multi-003");
 
         let result = validate::run(Some(root.to_str().unwrap()), None);
-        assert!(result.is_ok(), "expected Ok for multiple valid records: {result:?}");
+        assert!(
+            result.is_ok(),
+            "expected Ok for multiple valid records: {result:?}"
+        );
     }
 
     /// A record with invalid JSON should cause a parse error.
@@ -210,7 +216,10 @@ mod graph_tests {
 
         let content = fs::read_to_string(&out_path).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
-        assert!(parsed.get("edges").is_some(), "JSON output must have 'edges' key");
+        assert!(
+            parsed.get("edges").is_some(),
+            "JSON output must have 'edges' key"
+        );
     }
 
     /// Unsupported format must return an error.
@@ -255,8 +264,14 @@ mod report_tests {
         assert!(out_path.exists(), "report file must be created");
 
         let content = fs::read_to_string(&out_path).unwrap();
-        assert!(content.contains("= Seam Report"), "report must start with AsciiDoc title");
-        assert!(content.contains("seam-report-001"), "report must include record ID");
+        assert!(
+            content.contains("= Seam Report"),
+            "report must start with AsciiDoc title"
+        );
+        assert!(
+            content.contains("seam-report-001"),
+            "report must include record ID"
+        );
     }
 }
 
@@ -266,7 +281,7 @@ mod report_tests {
 
 #[cfg(test)]
 mod model_tests {
-    use seamctl::model::{SeamRecord, Owner};
+    use seamctl::model::{Owner, SeamRecord};
 
     /// A fully specified record JSON must deserialise without error.
     #[test]
@@ -315,7 +330,10 @@ mod model_tests {
         });
 
         let record: Result<SeamRecord, _> = serde_json::from_value(json);
-        assert!(record.is_ok(), "expected successful deserialisation: {record:?}");
+        assert!(
+            record.is_ok(),
+            "expected successful deserialisation: {record:?}"
+        );
 
         let r = record.unwrap();
         assert_eq!(r.id, "seam-model-001");

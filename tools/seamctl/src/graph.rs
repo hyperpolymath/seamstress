@@ -21,7 +21,8 @@ fn discover(root: &Utf8PathBuf) -> Vec<Utf8PathBuf> {
             continue;
         }
         let s = p.to_string_lossy();
-        let is_candidate_dir = s.contains("/seams/records/") || (s.contains("/targets/") && s.contains("/seams/records/"));
+        let is_candidate_dir = s.contains("/seams/records/")
+            || (s.contains("/targets/") && s.contains("/seams/records/"));
         if !is_candidate_dir {
             continue;
         }
@@ -50,18 +51,25 @@ pub fn run(root: Option<&str>, format: &str, out: Option<&str>) -> Result<()> {
         let raw = std::fs::read_to_string(&f).with_context(|| format!("read {f}"))?;
         let rec: SeamRecord = serde_json::from_str(&raw).with_context(|| format!("decode {f}"))?;
 
-        let a_idx = *node_map.entry(rec.side_a.clone()).or_insert_with(|| g.add_node(rec.side_a.clone()));
-        let b_idx = *node_map.entry(rec.side_b.clone()).or_insert_with(|| g.add_node(rec.side_b.clone()));
+        let a_idx = *node_map
+            .entry(rec.side_a.clone())
+            .or_insert_with(|| g.add_node(rec.side_a.clone()));
+        let b_idx = *node_map
+            .entry(rec.side_b.clone())
+            .or_insert_with(|| g.add_node(rec.side_b.clone()));
         g.add_edge(a_idx, b_idx, rec.id.clone());
         seams.push(rec.id);
     }
 
     let components: Vec<&String> = g.node_weights().collect();
-    let edges: Vec<serde_json::Value> = g.edge_indices().map(|ei| {
-        let (a, b) = g.edge_endpoints(ei).unwrap();
-        let id = &g[ei];
-        json!({"from": g[a], "to": g[b], "seam": id})
-    }).collect();
+    let edges: Vec<serde_json::Value> = g
+        .edge_indices()
+        .map(|ei| {
+            let (a, b) = g.edge_endpoints(ei).unwrap();
+            let id = &g[ei];
+            json!({"from": g[a], "to": g[b], "seam": id})
+        })
+        .collect();
 
     let payload = json!({
         "components": components,
@@ -76,7 +84,10 @@ pub fn run(root: Option<&str>, format: &str, out: Option<&str>) -> Result<()> {
         for ei in g.edge_indices() {
             let (a, b) = g.edge_endpoints(ei).unwrap();
             let id = &g[ei];
-            s.push_str(&format!("  \"{}\" -> \"{}\" [label=\"{}\"];\n", g[a], g[b], id));
+            s.push_str(&format!(
+                "  \"{}\" -> \"{}\" [label=\"{}\"];\n",
+                g[a], g[b], id
+            ));
         }
         s.push_str("}\n");
         s
