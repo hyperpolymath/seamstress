@@ -92,7 +92,7 @@ fn write_valid_record(dir: &Path, id: &str) {
 }
 
 /// Write the minimal permissive JSON Schema that seamctl compiles.
-fn write_permissive_schema(dir: &Path) {
+fn write_permissive_schema(dir: &Path) -> PathBuf {
     let schema_dir = dir.join("seams").join("schema");
     fs::create_dir_all(&schema_dir).unwrap();
 
@@ -102,7 +102,8 @@ fn write_permissive_schema(dir: &Path) {
     });
 
     let path = schema_dir.join("seam-record.schema.json");
-    fs::write(path, serde_json::to_string(&schema).unwrap()).unwrap();
+    fs::write(&path, serde_json::to_string(&schema).unwrap()).unwrap();
+    path
 }
 
 // ---------------------------------------------------------------------------
@@ -126,8 +127,8 @@ mod validate_tests {
     #[test]
     fn schema_only_no_records_returns_error() {
         let root = tmp_dir("validate_schema_only");
-        write_permissive_schema(&root);
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let schema = write_permissive_schema(&root);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_err(), "expected Err when no seam records exist");
     }
 
@@ -135,10 +136,10 @@ mod validate_tests {
     #[test]
     fn valid_record_passes_validation() {
         let root = tmp_dir("validate_valid");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
         write_valid_record(&root, "seam-valid-001");
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_ok(), "expected Ok for valid record: {result:?}");
     }
 
@@ -153,12 +154,12 @@ mod validate_tests {
     #[test]
     fn multiple_valid_records_pass() {
         let root = tmp_dir("validate_multi");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
         write_valid_record(&root, "seam-multi-001");
         write_valid_record(&root, "seam-multi-002");
         write_valid_record(&root, "seam-multi-003");
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(
             result.is_ok(),
             "expected Ok for multiple valid records: {result:?}"
@@ -169,13 +170,13 @@ mod validate_tests {
     #[test]
     fn malformed_json_returns_error() {
         let root = tmp_dir("validate_malformed");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
 
         let records_dir = root.join("seams").join("records");
         fs::create_dir_all(&records_dir).unwrap();
         fs::write(records_dir.join("bad.seam.json"), b"{ not valid json }").unwrap();
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_err(), "expected Err for malformed JSON");
     }
 }

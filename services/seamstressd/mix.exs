@@ -27,7 +27,7 @@ defmodule Seamstressd.MixProject do
 
   defp aliases do
     [
-      "seam.validate": ["run -e 'Seamstressd.Runner.validate!(".")'"]
+      "seam.validate": ["run -e 'Seamstressd.Runner.validate!(\".\")'"]
     ]
   end
 end
