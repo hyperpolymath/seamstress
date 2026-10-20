@@ -25,7 +25,8 @@ fn discover_seam_files(root: &Utf8PathBuf) -> Vec<Utf8PathBuf> {
         }
         let s = p.to_string_lossy();
         // Search common roots; keep simple and robust in v0.
-        let is_candidate_dir = s.contains("/seams/records/") || s.contains("/targets/") && s.contains("/seams/records/");
+        let is_candidate_dir = s.contains("/seams/records/")
+            || s.contains("/targets/") && s.contains("/seams/records/");
         if !is_candidate_dir {
             continue;
         }
@@ -53,7 +54,11 @@ fn compile_schema(schema_path: &Utf8PathBuf) -> Result<JSONSchema> {
         .map_err(|e| anyhow!("schema compile failed: {e}"))
 }
 
-fn policy_checks(record: &SeamRecord, record_path: &Utf8PathBuf, root: &Utf8PathBuf) -> Vec<String> {
+fn policy_checks(
+    record: &SeamRecord,
+    record_path: &Utf8PathBuf,
+    root: &Utf8PathBuf,
+) -> Vec<String> {
     let mut errs = vec![];
     if record.owners.is_empty() {
         errs.push("owners must be non-empty".into());
@@ -67,7 +72,10 @@ fn policy_checks(record: &SeamRecord, record_path: &Utf8PathBuf, root: &Utf8Path
     // Ensure checklist statuses exist and are non-empty
     for (name, st) in [
         ("checks.conformance", &record.checks.conformance.status),
-        ("checks.no_hidden_channels", &record.checks.no_hidden_channels.status),
+        (
+            "checks.no_hidden_channels",
+            &record.checks.no_hidden_channels.status,
+        ),
         ("checks.evolution", &record.checks.evolution.status),
     ] {
         if st.trim().is_empty() {
@@ -79,13 +87,19 @@ fn policy_checks(record: &SeamRecord, record_path: &Utf8PathBuf, root: &Utf8Path
     for a in &record.contract_artifacts {
         let p = root.join(&a.path);
         if !p.exists() {
-            errs.push(format!("missing contract_artifact path: {} (from {})", a.path, record_path));
+            errs.push(format!(
+                "missing contract_artifact path: {} (from {})",
+                a.path, record_path
+            ));
         }
     }
     for tv in &record.test_vectors {
         let p = root.join(tv);
         if !p.exists() {
-            errs.push(format!("missing test_vectors path: {} (from {})", tv, record_path));
+            errs.push(format!(
+                "missing test_vectors path: {} (from {})",
+                tv, record_path
+            ));
         }
     }
 
@@ -94,13 +108,17 @@ fn policy_checks(record: &SeamRecord, record_path: &Utf8PathBuf, root: &Utf8Path
 
 pub fn run(root: Option<&str>, schema: Option<&str>) -> Result<()> {
     let root = root.map(Utf8PathBuf::from).unwrap_or_else(default_root);
-    let schema_path = schema.map(Utf8PathBuf::from).unwrap_or_else(default_schema_path);
+    let schema_path = schema
+        .map(Utf8PathBuf::from)
+        .unwrap_or_else(default_schema_path);
 
     let compiled = compile_schema(&schema_path)?;
     let seam_files = discover_seam_files(&root);
 
     if seam_files.is_empty() {
-        return Err(anyhow!("no *.seam.json files found under seams/records or targets/**/seams/records"));
+        return Err(anyhow!(
+            "no *.seam.json files found under seams/records or targets/**/seams/records"
+        ));
     }
 
     let mut schema_errors = vec![];
@@ -115,7 +133,8 @@ pub fn run(root: Option<&str>, schema: Option<&str>) -> Result<()> {
             continue;
         }
         // Deserialize to run policy checks
-        let rec: SeamRecord = serde_json::from_value(v).with_context(|| format!("decode seam record {f}"))?;
+        let rec: SeamRecord =
+            serde_json::from_value(v).with_context(|| format!("decode seam record {f}"))?;
         for pe in policy_checks(&rec, &f, &root) {
             policy_errors.push(format!("{f}: {pe}"));
         }

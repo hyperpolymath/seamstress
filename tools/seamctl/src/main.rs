@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-mod cli;
-mod graph;
-mod model;
-mod report;
-mod validate;
-
 use anyhow::Result;
 use clap::Parser;
+use seamctl::cli;
 
 fn main() {
     if let Err(e) = run() {

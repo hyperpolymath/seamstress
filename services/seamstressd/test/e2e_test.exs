@@ -16,7 +16,12 @@ defmodule Seamstressd.E2ETest do
   # Create a minimal temporary workspace that mimics a real seamstress repo.
   # Returns {:ok, root_path} where root_path contains seams/records/.
   defp tmp_workspace(label) do
-    root = Path.join(System.tmp_dir!(), "seamstress_e2e_#{label}_#{System.unique_integer([:positive])}")
+    root =
+      Path.join(
+        System.tmp_dir!(),
+        "seamstress_e2e_#{label}_#{System.unique_integer([:positive])}"
+      )
+
     seams_dir = Path.join([root, "seams", "records"])
     schema_dir = Path.join([root, "seams", "schema"])
     File.mkdir_p!(seams_dir)
@@ -26,12 +31,8 @@ defmodule Seamstressd.E2ETest do
 
   # Write a placeholder schema so seamctl has something to compile against.
   defp write_schema(root) do
-    schema = %{
-      "$schema" => "http://json-schema.org/draft-07/schema#",
-      "type" => "object"
-    }
     path = Path.join([root, "seams", "schema", "seam-record.schema.json"])
-    File.write!(path, Jason.encode!(schema))
+    File.write!(path, ~s({"$schema":"http://json-schema.org/draft-07/schema#","type":"object"}))
     path
   end
 

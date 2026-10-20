@@ -24,10 +24,13 @@ use std::path::{Path, PathBuf};
 /// Returns a fresh temporary directory unique to this test invocation.
 fn tmp_dir(label: &str) -> PathBuf {
     let base = std::env::temp_dir();
-    let name = format!("seamctl_test_{label}_{}", std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos());
+    let name = format!(
+        "seamctl_test_{label}_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+    );
     let path = base.join(name);
     fs::create_dir_all(&path).expect("failed to create temp dir");
     path
@@ -89,7 +92,7 @@ fn write_valid_record(dir: &Path, id: &str) {
 }
 
 /// Write the minimal permissive JSON Schema that seamctl compiles.
-fn write_permissive_schema(dir: &Path) {
+fn write_permissive_schema(dir: &Path) -> PathBuf {
     let schema_dir = dir.join("seams").join("schema");
     fs::create_dir_all(&schema_dir).unwrap();
 
@@ -99,7 +102,8 @@ fn write_permissive_schema(dir: &Path) {
     });
 
     let path = schema_dir.join("seam-record.schema.json");
-    fs::write(path, serde_json::to_string(&schema).unwrap()).unwrap();
+    fs::write(&path, serde_json::to_string(&schema).unwrap()).unwrap();
+    path
 }
 
 // ---------------------------------------------------------------------------
@@ -123,8 +127,8 @@ mod validate_tests {
     #[test]
     fn schema_only_no_records_returns_error() {
         let root = tmp_dir("validate_schema_only");
-        write_permissive_schema(&root);
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let schema = write_permissive_schema(&root);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_err(), "expected Err when no seam records exist");
     }
 
@@ -132,10 +136,10 @@ mod validate_tests {
     #[test]
     fn valid_record_passes_validation() {
         let root = tmp_dir("validate_valid");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
         write_valid_record(&root, "seam-valid-001");
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_ok(), "expected Ok for valid record: {result:?}");
     }
 
@@ -150,26 +154,29 @@ mod validate_tests {
     #[test]
     fn multiple_valid_records_pass() {
         let root = tmp_dir("validate_multi");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
         write_valid_record(&root, "seam-multi-001");
         write_valid_record(&root, "seam-multi-002");
         write_valid_record(&root, "seam-multi-003");
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
-        assert!(result.is_ok(), "expected Ok for multiple valid records: {result:?}");
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
+        assert!(
+            result.is_ok(),
+            "expected Ok for multiple valid records: {result:?}"
+        );
     }
 
     /// A record with invalid JSON should cause a parse error.
     #[test]
     fn malformed_json_returns_error() {
         let root = tmp_dir("validate_malformed");
-        write_permissive_schema(&root);
+        let schema = write_permissive_schema(&root);
 
         let records_dir = root.join("seams").join("records");
         fs::create_dir_all(&records_dir).unwrap();
         fs::write(records_dir.join("bad.seam.json"), b"{ not valid json }").unwrap();
 
-        let result = validate::run(Some(root.to_str().unwrap()), None);
+        let result = validate::run(Some(root.to_str().unwrap()), Some(schema.to_str().unwrap()));
         assert!(result.is_err(), "expected Err for malformed JSON");
     }
 }
@@ -210,7 +217,10 @@ mod graph_tests {
 
         let content = fs::read_to_string(&out_path).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
-        assert!(parsed.get("edges").is_some(), "JSON output must have 'edges' key");
+        assert!(
+            parsed.get("edges").is_some(),
+            "JSON output must have 'edges' key"
+        );
     }
 
     /// Unsupported format must return an error.
@@ -255,8 +265,14 @@ mod report_tests {
         assert!(out_path.exists(), "report file must be created");
 
         let content = fs::read_to_string(&out_path).unwrap();
-        assert!(content.contains("= Seam Report"), "report must start with AsciiDoc title");
-        assert!(content.contains("seam-report-001"), "report must include record ID");
+        assert!(
+            content.contains("= Seam Report"),
+            "report must start with AsciiDoc title"
+        );
+        assert!(
+            content.contains("seam-report-001"),
+            "report must include record ID"
+        );
     }
 }
 
@@ -266,7 +282,7 @@ mod report_tests {
 
 #[cfg(test)]
 mod model_tests {
-    use seamctl::model::{SeamRecord, Owner};
+    use seamctl::model::{Owner, SeamRecord};
 
     /// A fully specified record JSON must deserialise without error.
     #[test]
@@ -315,7 +331,10 @@ mod model_tests {
         });
 
         let record: Result<SeamRecord, _> = serde_json::from_value(json);
-        assert!(record.is_ok(), "expected successful deserialisation: {record:?}");
+        assert!(
+            record.is_ok(),
+            "expected successful deserialisation: {record:?}"
+        );
 
         let r = record.unwrap();
         assert_eq!(r.id, "seam-model-001");

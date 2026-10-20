@@ -29,7 +29,12 @@ defmodule Seamstressd.PropertyTest do
   # Generate a stream of empty temporary directories (exist, but no records).
   defp empty_temp_dirs(count) do
     for i <- 1..count do
-      path = Path.join(System.tmp_dir!(), "seamstress_prop_empty_#{i}_#{System.unique_integer([:positive])}")
+      path =
+        Path.join(
+          System.tmp_dir!(),
+          "seamstress_prop_empty_#{i}_#{System.unique_integer([:positive])}"
+        )
+
       File.mkdir_p!(path)
       path
     end
@@ -38,7 +43,12 @@ defmodule Seamstressd.PropertyTest do
   # Generate paths with seams/records/ present but no .seam.json files.
   defp dirs_with_records_dir_but_no_files(count) do
     for i <- 1..count do
-      root = Path.join(System.tmp_dir!(), "seamstress_prop_nofiles_#{i}_#{System.unique_integer([:positive])}")
+      root =
+        Path.join(
+          System.tmp_dir!(),
+          "seamstress_prop_nofiles_#{i}_#{System.unique_integer([:positive])}"
+        )
+
       records = Path.join([root, "seams", "records"])
       File.mkdir_p!(records)
       # Add a decoy file that is NOT a .seam.json
@@ -144,6 +154,7 @@ defmodule Seamstressd.PropertyTest do
         end
 
       unique_classes = Enum.uniq(classes)
+
       assert length(unique_classes) == 1,
              "Expected a single error class across runs, got: #{inspect(unique_classes)}"
     end

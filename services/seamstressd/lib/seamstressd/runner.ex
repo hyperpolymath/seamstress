@@ -6,10 +6,21 @@ defmodule Seamstressd.Runner do
   """
 
   def validate!(root) do
+    repo_root = Path.expand("../../../..", __DIR__)
     cmd = "cargo"
-    args = ["run", "--quiet", "--manifest-path", "tools/seamctl/Cargo.toml", "--", "validate", "--root", root]
 
-    {out, code} = System.cmd(cmd, args, stderr_to_stdout: true)
+    args = [
+      "run",
+      "--quiet",
+      "--manifest-path",
+      "tools/seamctl/Cargo.toml",
+      "--",
+      "validate",
+      "--root",
+      root
+    ]
+
+    {out, code} = System.cmd(cmd, args, cd: repo_root, stderr_to_stdout: true)
 
     IO.write(out)
 

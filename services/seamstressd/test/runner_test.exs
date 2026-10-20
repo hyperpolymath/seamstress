@@ -10,87 +10,16 @@ defmodule Seamstressd.RunnerTest do
   # Helpers
   # ---------------------------------------------------------------------------
 
-  # Build a temporary directory tree containing the minimal file structure
-  # that seamctl expects (seams/schema/ and seams/records/).  Returns the
-  # root path as a string so tests can call Runner.validate!/1 against it.
+  # Build a temporary records tree accepted by the repository schema.
+  # Return its root path so tests can call Runner.validate!/1 against it.
   defp make_valid_seam_tree(root) do
-    schema_dir = Path.join([root, "seams", "schema"])
     records_dir = Path.join([root, "seams", "records"])
-    File.mkdir_p!(schema_dir)
     File.mkdir_p!(records_dir)
 
-    # Minimal JSON Schema accepted by jsonschema Draft-7
-    schema = %{
-      "$schema" => "http://json-schema.org/draft-07/schema#",
-      "type" => "object",
-      "properties" => %{
-        "id" => %{"type" => "string"},
-        "title" => %{"type" => "string"},
-        "status" => %{"type" => "string"},
-        "owners" => %{"type" => "array"},
-        "side_a" => %{"type" => "string"},
-        "side_b" => %{"type" => "string"},
-        "boundary_type" => %{"type" => "string"},
-        "data_flows" => %{"type" => "array"},
-        "contract_artifacts" => %{"type" => "array"},
-        "compat_policy" => %{"type" => "object"},
-        "semantic_invariants" => %{"type" => "array"},
-        "security_invariants" => %{"type" => "array"},
-        "privacy_invariants" => %{"type" => "array"},
-        "test_vectors" => %{"type" => "array"},
-        "checks" => %{"type" => "object"},
-        "slo" => %{"type" => "object"},
-        "failure_behavior" => %{"type" => "object"},
-        "observability" => %{"type" => "object"},
-        "change_process" => %{"type" => "object"},
-        "rollout_backout" => %{"type" => "object"}
-      },
-      "required" => ["id", "title", "status", "owners", "side_a", "side_b",
-                     "boundary_type", "data_flows", "contract_artifacts",
-                     "compat_policy", "semantic_invariants", "security_invariants",
-                     "privacy_invariants", "test_vectors", "checks", "slo",
-                     "failure_behavior", "observability", "change_process",
-                     "rollout_backout"]
-    }
-
-    schema_path = Path.join(schema_dir, "seam-record.schema.json")
-    File.write!(schema_path, Jason.encode!(schema))
-
-    # Minimal valid seam record
-    record = %{
-      "id" => "seam-001",
-      "title" => "Test Seam",
-      "status" => "active",
-      "owners" => [%{"name" => "Test Owner", "contact" => "test@example.com", "role" => "owner"}],
-      "side_a" => "service-a",
-      "side_b" => "service-b",
-      "boundary_type" => "api",
-      "data_flows" => [%{"name" => "request", "direction" => "a->b", "description" => "HTTP request"}],
-      "contract_artifacts" => [],
-      "compat_policy" => %{"strategy" => "semver", "rules" => ["no breaking changes"], "deprecation_window_days" => 30},
-      "semantic_invariants" => ["idempotent"],
-      "security_invariants" => ["authenticated"],
-      "privacy_invariants" => ["no PII in logs"],
-      "test_vectors" => [],
-      "checks" => %{
-        "conformance" => %{"status" => "pass", "notes" => ""},
-        "no_hidden_channels" => %{"status" => "pass", "notes" => ""},
-        "evolution" => %{"status" => "pass", "notes" => ""}
-      },
-      "slo" => %{"latency_ms_p95" => 100, "error_rate_max" => 0.01},
-      "failure_behavior" => %{"timeouts" => "5s", "retries" => "3", "backpressure" => "drop", "idempotency" => "yes"},
-      "observability" => %{
-        "metrics" => ["requests_total"],
-        "logs" => %{"required_fields" => ["trace_id"]},
-        "tracing" => %{"propagation" => ["W3C"]}
-      },
-      "change_process" => %{"required_reviewers" => ["owner"], "gates" => ["ci-pass"]},
-      "rollout_backout" => %{"rollout_steps" => ["deploy"], "backout_steps" => ["rollback"]}
-    }
-
-    record_path = Path.join(records_dir, "seam-001.seam.json")
-    File.write!(record_path, Jason.encode!(record))
-
+    # Use the example accepted by seamctl's repository schema, including
+    # its self-referencing contract artifact.
+    example = Path.expand("../../../seams/records/_example.seam.json", __DIR__)
+    File.cp!(example, Path.join(records_dir, "_example.seam.json"))
     root
   end
 
@@ -109,7 +38,9 @@ defmodule Seamstressd.RunnerTest do
       # but the important thing is the function accepts a string argument.
       # We capture the raise rather than letting it crash the test.
       assert_raise RuntimeError, fn ->
-        Seamstressd.Runner.validate!("/tmp/seamstress_nonexistent_#{System.unique_integer([:positive])}")
+        Seamstressd.Runner.validate!(
+          "/tmp/seamstress_nonexistent_#{System.unique_integer([:positive])}"
+        )
       end
     end
 
@@ -169,7 +100,9 @@ defmodule Seamstressd.RunnerTest do
     end
 
     test "validate!/1 rejects path with only non-seam files" do
-      root = Path.join(System.tmp_dir!(), "seamstress_norecords_#{System.unique_integer([:positive])}")
+      root =
+        Path.join(System.tmp_dir!(), "seamstress_norecords_#{System.unique_integer([:positive])}")
+
       File.mkdir_p!(Path.join([root, "seams", "records"]))
       File.write!(Path.join([root, "seams", "records", "README.txt"]), "not a seam file")
 
