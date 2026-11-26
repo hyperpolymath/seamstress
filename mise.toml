@@ -2,11 +2,9 @@
 # Language runtimes
 rust = "latest"
 zig = "latest"
-bun = "latest"
-denojs = "latest"
+bun = "1.4"
 
 # Package managers
-pnpm = "latest"
 cargo = "latest"
 go-task = "latest"
 
@@ -29,10 +27,20 @@ gnu-grep = "latest"
 [env]
 # Common environment variables
 
-# Task runner alias
+# Tool-version aliases only ([alias] cannot hold commands)
 [alias]
 task = "go-task"
-build = "cargo build --release"
-test = "cargo test"
-lint = "bun install --frozen-lockfile && bunx --no-install --bun prettier --check ."
-fmt = "bun install --frozen-lockfile && bunx --no-install --bun prettier --write ."
+
+[tasks.build]
+dir = "tools/seamctl"
+run = "cargo build --release"
+
+[tasks.test]
+dir = "tools/seamctl"
+run = "cargo test"
+
+[tasks.lint]
+run = "bun install --frozen-lockfile && bunx --no-install --bun prettier --check ."
+
+[tasks.fmt]
+run = "bun install --frozen-lockfile && bunx --no-install --bun prettier --write ."
