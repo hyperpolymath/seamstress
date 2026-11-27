@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: MPL-2.0
+# package.json is JCS-canonical (LANGUAGE-POLICY §1.4).
+# Prettier must not reformat it.
+package.json
+
+# No Prettier baseline yet: files below are not Prettier-formatted (or are stamped/generated).
+# Remove an entry once the file is formatted.
+.claude/CLAUDE.md
+.github/CONTRIBUTING.md
+.github/dependabot.yml
+.github/label-classifier.json
+.github/workflows/casket-pages.yml
+.github/workflows/codeql.yml
+.github/workflows/dogfood-gate.yml
+.github/workflows/hypatia-scan.yml
+.github/workflows/labels.yml
+.github/workflows/pages.yml
+.github/workflows/push-email-notify.yml
+.github/workflows/scorecard.yml
+seams/records/_example.seam.json
+seams/schema/seam-record.schema.json
+targets/frr-zebra/seams/records/zebra-zserv.seam.json
